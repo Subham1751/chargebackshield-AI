@@ -175,7 +175,7 @@ def load_policies_to_chromadb() -> None:
 
     existing = policies_collection.get()
     if existing["ids"]:
-        print("   ℹ️  Policies already loaded. Skipping re-ingestion.")
+        print(" Policies already loaded. Skipping re-ingestion.")
         return
 
     for policy in DISPUTE_POLICIES:
@@ -190,9 +190,9 @@ def load_policies_to_chromadb() -> None:
                 "source":   "razorpay_dispute_policy_v2",
             }],
         )
-        print(f"   ✅ Embedded & stored → {policy['title']}")
+        print(f" Embedded & stored → {policy['title']}")
 
-    print("🟢 [RAG INIT] All 4 policies loaded into vector store.\n")
+    print("[RAG INIT] All 4 policies loaded into vector store.\n")
 
 
 # Run at startup
@@ -517,7 +517,7 @@ async def analyze_dispute(
     
     # STEP 5: GEMINI TEXT — FINAL VERDICT SYNTHESIS
     
-    print("\n🧠 [Step 5/5] Gemini Text — Final Verdict Synthesis")
+    print("\n [Step 5/5] Gemini Text — Final Verdict Synthesis")
     try:
         synthesis_start   = time.time()
         verdict           = synthesize_final_verdict(context, vision_evidence, top_policy)
