@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChargebackShield AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .dropzone-dragover {
+        border-color: #2563eb !important;
+        background-color: #eff6ff !important;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-slate-950 text-white">
+    <div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
+      <!-- Header -->
+      <div class="mb-8">
+        <div
+          class="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-4 py-2 text-blue-300 border border-blue-500/20"
+        >
+          <span class="h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
+          Razorpay Internship Project
+        </div>
+        <h1 class="mt-4 text-4xl md:text-5xl font-bold tracking-tight">
+          ChargebackShield AI
+        </h1>
+        <p class="mt-3 max-w-2xl text-slate-300 text-lg">
+          Multimodal RAG-powered dispute resolution engine for fintech
+          merchants.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Input Panel -->
+        <div
+          class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6 shadow-2xl"
+        >
+          <h2 class="text-2xl font-semibold mb-2">Analyze a Dispute</h2>
+          <p class="text-slate-400 mb-6">
+            Upload an evidence screenshot and explain the case. The AI will
+            extract evidence, retrieve policy, and generate a bank-ready
+            response.
+          </p>
+
+          <form id="disputeForm" class="space-y-5">
+            <!-- Context -->
+            <div>
+              <label
+                for="context"
+                class="block text-sm font-medium text-slate-300 mb-2"
+              >
+                Dispute Context
+              </label>
+              <textarea
+                id="context"
+                rows="4"
+                class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Example: Customer claims the order was not delivered. I have delivery proof and WhatsApp confirmation."
+                required
+              ></textarea>
+            </div>
+
+            <!-- Drag and drop -->
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">
+                Evidence Upload
+              </label>
+
+              <div
+                id="dropzone"
+                class="dropzone rounded-2xl border-2 border-dashed border-white/15 bg-slate-900/60 p-6 text-center transition"
+              >
+                <input
+                  id="fileInput"
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  required
+                />
+
+                <div class="flex flex-col items-center justify-center gap-3">
+                  <div
+                    class="h-14 w-14 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-7 w-7 text-blue-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                  </div>
+
+                  <div>
+                    <p class="text-white font-medium">
+                      Drag and drop your image here
+                    </p>
+                    <p class="text-slate-400 text-sm mt-1">
+                      or click to browse PNG, JPG, WEBP
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    id="browseBtn"
+                    class="rounded-xl bg-white/10 hover:bg-white/15 px-4 py-2 text-sm font-medium border border-white/10 transition"
+                  >
+                    Browse Files
+                  </button>
+                </div>
+              </div>
+
+              <div
+                id="fileInfo"
+                class="hidden mt-3 rounded-xl bg-slate-900/70 border border-white/10 p-3"
+              >
+                <div class="flex items-center justify-between gap-4">
+                  <div class="min-w-0">
+                    <p class="text-sm text-slate-300">Selected file</p>
+                    <p
+                      id="fileName"
+                      class="text-white font-medium truncate"
+                    ></p>
+                  </div>
+                  <button
+                    type="button"
+                    id="removeFileBtn"
+                    class="text-sm text-red-400 hover:text-red-300"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit -->
+            <button
+              type="submit"
+              class="w-full rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-3 font-semibold text-white shadow-lg shadow-blue-600/20 hover:opacity-95 transition disabled:opacity-60 disabled:cursor-not-allowed"
+              id="submitBtn"
+            >
+              Analyze Dispute
+            </button>
+          </form>
+
+          <!-- Loading -->
+          <div
+            id="loadingBox"
+            class="hidden mt-6 rounded-2xl border border-blue-500/20 bg-blue-500/10 p-4"
+          >
+            <div class="flex items-center gap-3">
+              <div class="h-3 w-3 rounded-full bg-blue-400 animate-pulse"></div>
+              <p class="font-semibold text-blue-200">
+                AI is analyzing the dispute...
+              </p>
+            </div>
+            <div
+              id="loadingLogs"
+              class="mt-3 space-y-1 text-sm text-blue-100/80 font-mono"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div
+          class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6 shadow-2xl"
+        >
+          <h2 class="text-2xl font-semibold mb-2">AI Verdict</h2>
+          <p class="text-slate-400 mb-6">
+            Results will appear here after the analysis finishes.
+          </p>
+
+          <!-- Empty state -->
+          <div
+            id="emptyState"
+            class="rounded-2xl border border-dashed border-white/10 bg-slate-900/50 p-8 text-center"
+          >
+            <div
+              class="mx-auto mb-4 h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-8 w-8 text-slate-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 17v-2a4 4 0 014-4h2a4 4 0 014 4v2m-6-6a4 4 0 100-8 4 4 0 000 8z"
+                />
+              </svg>
+            </div>
+            <p class="text-slate-300 font-medium">No analysis yet</p>
+            <p class="text-slate-500 text-sm mt-1">
+              Upload evidence and click analyze to see the verdict.
+            </p>
+          </div>
+
+          <!-- Result card -->
+          <div id="resultsCard" class="hidden space-y-5">
+            <div class="rounded-2xl bg-slate-900/70 border border-white/10 p-5">
+              <div class="flex items-center justify-between gap-4 flex-wrap">
+                <div>
+                  <p class="text-slate-400 text-sm">Win Probability</p>
+                  <p
+                    id="winProbability"
+                    class="text-4xl font-bold text-emerald-400 mt-1"
+                  >
+                    --
+                  </p>
+                </div>
+                <div
+                  class="rounded-xl border border-white/10 bg-white/5 px-4 py-2"
+                >
+                  <p class="text-slate-400 text-xs">Confidence</p>
+                  <p id="confidenceLevel" class="font-semibold text-white">
+                    --
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div
+                class="rounded-2xl bg-slate-900/70 border border-white/10 p-4"
+              >
+                <p class="text-slate-400 text-sm mb-1">Policy Applied</p>
+                <p id="policyApplied" class="font-semibold text-white">--</p>
+              </div>
+
+              <div
+                class="rounded-2xl bg-slate-900/70 border border-white/10 p-4"
+              >
+                <p class="text-slate-400 text-sm mb-1">Processing Time</p>
+                <p id="processingTime" class="font-semibold text-white">--</p>
+              </div>
+            </div>
+
+            <div class="rounded-2xl bg-slate-900/70 border border-white/10 p-4">
+              <p class="text-slate-400 text-sm mb-2">Reasoning</p>
+              <p id="reasoning" class="text-slate-100 leading-relaxed">--</p>
+            </div>
+
+            <div class="rounded-2xl bg-slate-900/70 border border-white/10 p-4">
+              <p class="text-slate-400 text-sm mb-2">Auto Response Draft</p>
+              <p
+                id="autoResponse"
+                class="text-slate-100 leading-relaxed whitespace-pre-wrap"
+              >
+                --
+              </p>
+            </div>
+
+            <div class="rounded-2xl bg-slate-900/70 border border-white/10 p-4">
+              <p class="text-slate-400 text-sm mb-2">Pipeline Logs</p>
+              <div
+                id="pipelineLogs"
+                class="space-y-1 text-sm font-mono text-emerald-300 whitespace-pre-wrap"
+              ></div>
+            </div>
+
+            <div class="flex gap-3">
+              <button
+                id="copyBtn"
+                type="button"
+                class="flex-1 rounded-xl bg-white/10 hover:bg-white/15 px-4 py-3 font-medium border border-white/10 transition"
+              >
+                Copy Verdict
+              </button>
+              <button
+                id="resetBtn"
+                type="button"
+                class="flex-1 rounded-xl bg-slate-800 hover:bg-slate-700 px-4 py-3 font-medium border border-white/10 transition"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <!-- Error box -->
+          <div
+            id="errorBox"
+            class="hidden mt-4 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-red-200"
+          >
+            <p class="font-semibold">Something went wrong</p>
+            <p id="errorText" class="text-sm mt-1"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // CONFIG
+
+      // Replace this with your deployed backend URL when ready
+      const BACKEND_URL = "http://localhost:8000";
+
+      // ELEMENTS
+
+      const form = document.getElementById("disputeForm");
+      const contextInput = document.getElementById("context");
+      const fileInput = document.getElementById("fileInput");
+      const dropzone = document.getElementById("dropzone");
+      const browseBtn = document.getElementById("browseBtn");
+      const fileInfo = document.getElementById("fileInfo");
+      const fileName = document.getElementById("fileName");
+      const removeFileBtn = document.getElementById("removeFileBtn");
+
+      const submitBtn = document.getElementById("submitBtn");
+      const loadingBox = document.getElementById("loadingBox");
+      const loadingLogs = document.getElementById("loadingLogs");
+
+      const emptyState = document.getElementById("emptyState");
+      const resultsCard = document.getElementById("resultsCard");
+      const errorBox = document.getElementById("errorBox");
+      const errorText = document.getElementById("errorText");
+
+      const winProbabilityEl = document.getElementById("winProbability");
+      const confidenceLevelEl = document.getElementById("confidenceLevel");
+      const policyAppliedEl = document.getElementById("policyApplied");
+      const processingTimeEl = document.getElementById("processingTime");
+      const reasoningEl = document.getElementById("reasoning");
+      const autoResponseEl = document.getElementById("autoResponse");
+      const pipelineLogsEl = document.getElementById("pipelineLogs");
+      const copyBtn = document.getElementById("copyBtn");
+      const resetBtn = document.getElementById("resetBtn");
+
+      let selectedFile = null;
+      let latestResult = null;
+
+      // HELPERS
+
+      function showError(message) {
+        errorText.textContent = message;
+        errorBox.classList.remove("hidden");
+      }
+
+      function hideError() {
+        errorBox.classList.add("hidden");
+        errorText.textContent = "";
+      }
+
+      function showLoadingLogs() {
+        const fakeLogs = [
+          "> Validating uploaded evidence...",
+          "> Running Gemini Vision extraction...",
+          "> Querying ChromaDB vector store...",
+          "> Retrieving relevant dispute policy...",
+          "> Generating final verdict...",
+        ];
+
+        loadingLogs.innerHTML = "";
+        fakeLogs.forEach((log, index) => {
+          setTimeout(() => {
+            const line = document.createElement("div");
+            line.textContent = log;
+            loadingLogs.appendChild(line);
+          }, index * 450);
+        });
+      }
+
+      function formatResult(data) {
+        // Handle different backend response shapes safely
+        const verdict = data.verdict || data.analysis || data.ai_verdict || {};
+        const winProbability =
+          verdict.win_probability || verdict.winProbability || "--";
+        const confidenceLevel =
+          verdict.confidence_level || verdict.confidence || "--";
+        const reasoning = verdict.reasoning || "No reasoning returned.";
+        const autoResponse =
+          verdict.auto_response_draft ||
+          verdict.auto_response ||
+          "No response draft returned.";
+
+        const policyApplied =
+          data.rag_metadata?.primary_policy ||
+          data.policy_applied ||
+          verdict.policy_cited ||
+          "--";
+
+        const processingTime =
+          data.total_time_sec || data.processing_time_seconds || "--";
+
+        const logs = data.pipeline_logs || data.logs || [];
+
+        return {
+          winProbability,
+          confidenceLevel,
+          reasoning,
+          autoResponse,
+          policyApplied,
+          processingTime,
+          logs,
+        };
+      }
+
+      function renderResults(data) {
+        const result = formatResult(data);
+        latestResult = result;
+
+        emptyState.classList.add("hidden");
+        resultsCard.classList.remove("hidden");
+        errorBox.classList.add("hidden");
+
+        winProbabilityEl.textContent = result.winProbability;
+        confidenceLevelEl.textContent = result.confidenceLevel;
+        policyAppliedEl.textContent = result.policyApplied;
+        processingTimeEl.textContent = `${result.processingTime} sec`;
+        reasoningEl.textContent = result.reasoning;
+        autoResponseEl.textContent = result.autoResponse;
+
+        pipelineLogsEl.innerHTML = "";
+        if (result.logs && result.logs.length > 0) {
+          result.logs.forEach((log) => {
+            const div = document.createElement("div");
+            div.textContent = log;
+            pipelineLogsEl.appendChild(div);
+          });
+        } else {
+          pipelineLogsEl.textContent = "No pipeline logs returned.";
+        }
+      }
+
+      function resetUI() {
+        form.reset();
+        selectedFile = null;
+        fileInfo.classList.add("hidden");
+        fileName.textContent = "";
+        hideError();
+        loadingBox.classList.add("hidden");
+        loadingLogs.innerHTML = "";
+        resultsCard.classList.add("hidden");
+        emptyState.classList.remove("hidden");
+        latestResult = null;
+      }
+
+      // FILE HANDLING
+
+      function setFile(file) {
+        if (!file) return;
+
+        selectedFile = file;
+        fileName.textContent = file.name;
+        fileInfo.classList.remove("hidden");
+        hideError();
+      }
+
+      browseBtn.addEventListener("click", () => fileInput.click());
+      dropzone.addEventListener("click", (e) => {
+        // Prevent double-trigger if button clicked
+        if (e.target !== browseBtn) fileInput.click();
+      });
+
+      fileInput.addEventListener("change", (e) => {
+        if (e.target.files && e.target.files[0]) {
+          setFile(e.target.files[0]);
+        }
+      });
+
+      removeFileBtn.addEventListener("click", () => {
+        selectedFile = null;
+        fileInput.value = "";
+        fileInfo.classList.add("hidden");
+        fileName.textContent = "";
+      });
+
+      // Drag and drop
+      ["dragenter", "dragover"].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropzone.classList.add("dropzone-dragover");
+        });
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropzone.classList.remove("dropzone-dragover");
+        });
+      });
+
+      dropzone.addEventListener("drop", (e) => {
+        const files = e.dataTransfer.files;
+        if (files && files[0]) {
+          const file = files[0];
+          if (!file.type.startsWith("image/")) {
+            showError("Please upload an image file only.");
+            return;
+          }
+          fileInput.files = files;
+          setFile(file);
+        }
+      });
+
+      // FORM SUBMIT
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        hideError();
+
+        if (!selectedFile) {
+          showError("Please upload an evidence image.");
+          return;
+        }
+
+        const context = contextInput.value.trim();
+        if (context.length < 10) {
+          showError(
+            "Please write a bit more context so the AI can analyze the dispute properly.",
+          );
+          return;
+        }
+
+        try {
+          submitBtn.disabled = true;
+          loadingBox.classList.remove("hidden");
+          showLoadingLogs();
+
+          const formData = new FormData();
+          formData.append("context", context);
+          formData.append("file", selectedFile);
+
+          const response = await fetch(`${BACKEND_URL}/analyze-dispute`, {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.detail || "Backend request failed");
+          }
+
+          renderResults(data);
+        } catch (err) {
+          showError(err.message || "Unexpected error occurred.");
+        } finally {
+          submitBtn.disabled = false;
+          loadingBox.classList.add("hidden");
+        }
+      });
+
+      // ACTION BUTTONS
+
+      copyBtn.addEventListener("click", async () => {
+        if (!latestResult) return;
+
+        const text = `
+Win Probability: ${latestResult.winProbability}
+Confidence: ${latestResult.confidenceLevel}
+Policy: ${latestResult.policyApplied}
+Processing Time: ${latestResult.processingTime} sec
+
+Reasoning:
+${latestResult.reasoning}
+
+Auto Response:
+${latestResult.autoResponse}
+      `.trim();
+
+        try {
+          await navigator.clipboard.writeText(text);
+          copyBtn.textContent = "Copied!";
+          setTimeout(() => (copyBtn.textContent = "Copy Verdict"), 1200);
+        } catch {
+          showError("Could not copy to clipboard.");
+        }
+      });
+
+      resetBtn.addEventListener("click", resetUI);
+    </script>
+  </body>
+</html>
