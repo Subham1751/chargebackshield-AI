@@ -10,14 +10,6 @@ Built for the real operational pain point behind merchant chargebacks: teams nee
 - **Backend:** [https://chargebackshield-ai.onrender.com](https://chargebackshield-ai.onrender.com)
 - **API Health:** [https://chargebackshield-ai.onrender.com/health](https://chargebackshield-ai.onrender.com/health)
 
-## Screenshots
-
-> Screenshots can be added here after capturing the deployed UI.
-
-| Dispute Upload                    | AI Verdict                       |
-| --------------------------------- | -------------------------------- |
-| `frontend screenshot placeholder` | `results screenshot placeholder` |
-
 ## How It Works
 
 ChargebackShield AI follows a clear fintech dispute workflow:
