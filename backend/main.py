@@ -44,8 +44,8 @@ if not GEMINI_API_KEY:
 genai.configure(api_key=GEMINI_API_KEY)
 
 # Two model handles — one for vision, one for text synthesis
-vision_model = genai.GenerativeModel("gemini-1.5-flash")   # Multimodal (image + text)
-text_model   = genai.GenerativeModel("gemini-1.5-flash")   # Text synthesis / final verdict
+vision_model = genai.GenerativeModel("models/gemini-1.5-flash-latest")   # Multimodal (image + text)
+text_model   = genai.GenerativeModel("models/gemini-1.5-flash-latest")   # Text synthesis / final verdict
 
 print(" Gemini Vision + Text models initialized.")
 
@@ -578,7 +578,7 @@ async def analyze_dispute(
             "rag_latency_sec"       : rag_duration,
             "synthesis_latency_sec" : synthesis_duration,
             "total_latency_sec"     : total_time,
-            "model_used"            : "gemini-1.5-flash (vision + text)",
+            "model_used"            : "models/gemini-1.5-flash-latest (vision + text)",
             "embedding_engine"      : "ChromaDB default (all-MiniLM-L6-v2)",
         },
     }
