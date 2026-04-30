@@ -26,7 +26,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://chargebackshield-ai.vercel.app/"],       
+    allow_origins=["https://chargebackshield-ai.vercel.app"],       
     allow_methods=["*"],
     allow_headers=["*"],
     allow_credentials=True,
